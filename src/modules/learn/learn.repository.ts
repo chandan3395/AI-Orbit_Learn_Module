@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 
 import type { ResourceListQuery } from "./learn.types";
 
-const resourceCardSelect = {
+export const resourceCardSelect = {
   id: true,
   title: true,
   slug: true,

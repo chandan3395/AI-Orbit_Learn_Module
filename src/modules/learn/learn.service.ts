@@ -23,6 +23,7 @@ import type {
   ResourceListQuery,
   ResourceSort,
 } from "./learn.types";
+import { getUserState } from "./user-learning.service";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -168,7 +169,7 @@ export async function listPublicResources(raw: RawResourceListQuery = {}) {
   return { data: items.map(toResourceCard), pagination };
 }
 
-export async function getPublicResource(slug: string) {
+export async function getPublicResource(slug: string, userId?: string) {
   const record = await findPublishedResourceBySlug(slug);
   if (!record) {
     throw new LearnApiError(
@@ -177,7 +178,10 @@ export async function getPublicResource(slug: string) {
       "Learning resource not found",
     );
   }
-  return toResourceDetail(record);
+  const detail = toResourceDetail(record);
+  if (!userId) return detail;
+
+  return { ...detail, userState: await getUserState(userId, record.id) };
 }
 
 export async function listPublicCategories() {
