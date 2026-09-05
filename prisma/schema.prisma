@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ResourceType {
+  COURSE
+  GUIDE
+  EBOOK
+}
+
+enum ResourceDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ResourceStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LessonType {
+  TEXT
+  VIDEO
+  LINK
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum LessonProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id             String           @id @default(uuid()) @db.Uuid
+  name           String
+  email          String           @unique
+  passwordHash   String?
+  role           UserRole         @default(USER)
+  avatarUrl      String?
+  createdAt      DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @db.Timestamptz(3)
+  enrollments    Enrollment[]
+  lessonProgress LessonProgress[]
+  bookmarks      Bookmark[]
+}
+
+model Author {
+  id        String             @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String             @unique
+  bio       String?
+  avatarUrl String?
+  createdAt DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime           @updatedAt @db.Timestamptz(3)
+  resources LearningResource[]
+}
+
+model Category {
+  id          String                     @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String                     @unique
+  description String?
+  createdAt   DateTime                   @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime                   @updatedAt @db.Timestamptz(3)
+  resources   LearningResourceCategory[]
+}
+
+model Tag {
+  id        String                @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String                @unique
+  resources LearningResourceTag[]
+}
+
+model LearningResource {
+  id               String                     @id @default(uuid()) @db.Uuid
+  title            String
+  slug             String                     @unique
+  shortDescription String
+  description      String
+  thumbnailUrl     String?
+  type             ResourceType
+  difficulty       ResourceDifficulty
+  status           ResourceStatus             @default(DRAFT)
+  durationMinutes  Int?
+  sourceUrl        String?
+  isFeatured       Boolean                    @default(false)
+  authorId         String                     @db.Uuid
+  publishedAt      DateTime?                  @db.Timestamptz(3)
+  createdAt        DateTime                   @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime                   @updatedAt @db.Timestamptz(3)
+  author           Author                     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  categories       LearningResourceCategory[]
+  tags             LearningResourceTag[]
+  lessons          Lesson[]
+  enrollments      Enrollment[]
+  bookmarks        Bookmark[]
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([type, status])
+  @@index([isFeatured, status, publishedAt(sort: Desc)])
+  @@index([authorId, status, publishedAt(sort: Desc)])
+}
+
+model LearningResourceCategory {
+  resourceId String           @db.Uuid
+  categoryId String           @db.Uuid
+  resource   LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  category   Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, categoryId])
+  @@index([categoryId, resourceId])
+}
+
+model LearningResourceTag {
+  resourceId String           @db.Uuid
+  tagId      String           @db.Uuid
+  resource   LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  tag        Tag              @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, tagId])
+  @@index([tagId, resourceId])
+}
+
+model Lesson {
+  id              String           @id @default(uuid()) @db.Uuid
+  resourceId      String           @db.Uuid
+  title           String
+  slug            String
+  description     String?
+  type            LessonType
+  content         String?
+  videoUrl        String?
+  externalUrl     String?
+  durationMinutes Int?
+  order           Int
+  isPreview       Boolean          @default(false)
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
+  resource        LearningResource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  progress        LessonProgress[]
+
+  @@unique([resourceId, slug])
+  @@unique([resourceId, order])
+}
+
+model Enrollment {
+  id                 String           @id @default(uuid()) @db.Uuid
+  userId             String           @db.Uuid
+  resourceId         String           @db.Uuid
+  status             EnrollmentStatus @default(ACTIVE)
+  progressPercentage Int              @default(0)
+  startedAt          DateTime         @default(now()) @db.Timestamptz(3)
+  lastAccessedAt     DateTime         @default(now()) @db.Timestamptz(3)
+  completedAt        DateTime?        @db.Timestamptz(3)
+  createdAt          DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime         @updatedAt @db.Timestamptz(3)
+  user               User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  resource           LearningResource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, resourceId])
+  @@index([userId, status, lastAccessedAt(sort: Desc)])
+  @@index([resourceId, status])
+}
+
+model LessonProgress {
+  id              String               @id @default(uuid()) @db.Uuid
+  userId          String               @db.Uuid
+  lessonId        String               @db.Uuid
+  status          LessonProgressStatus @default(NOT_STARTED)
+  positionSeconds Int?                 @default(0)
+  startedAt       DateTime?            @db.Timestamptz(3)
+  completedAt     DateTime?            @db.Timestamptz(3)
+  updatedAt       DateTime             @updatedAt @db.Timestamptz(3)
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  lesson          Lesson               @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, lessonId])
+  @@index([userId, status, updatedAt(sort: Desc)])
+  @@index([lessonId, status])
+}
+
+model Bookmark {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @db.Uuid
+  resourceId String           @db.Uuid
+  createdAt  DateTime         @default(now()) @db.Timestamptz(3)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  resource   LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([resourceId])
+}
