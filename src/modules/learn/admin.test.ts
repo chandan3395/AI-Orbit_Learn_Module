@@ -24,6 +24,7 @@ import {
   authorCreateSchema,
   categoryCreateSchema,
   lessonCreateSchema,
+  lessonReorderSchema,
   resourceCreateSchema,
   tagCreateSchema,
 } from "./admin.validation";
@@ -115,6 +116,14 @@ describe("admin content management", { concurrency: 1 }, () => {
       () => adminCreateLesson(resource.id, lessonCreateSchema.parse({ title: "Duplicate Order", slug: "duplicate-order", type: "TEXT", content: "Duplicate order test content.", order: 2 })),
       (error) => mapApiError(error).code === "UNIQUE_CONSTRAINT",
     );
+  });
+
+  test("malformed identifiers and oversized reorder payloads are rejected", () => {
+    assert.equal(lessonReorderSchema.safeParse({ lessonIds: ["not-a-uuid"] }).success, false);
+    assert.equal(lessonReorderSchema.safeParse({
+      lessonIds: Array.from({ length: 101 }, (_, index) =>
+        `10000000-0000-4000-8000-${String(index + 100).padStart(12, "0")}`),
+    }).success, false);
   });
 
   test("lesson reordering accounts for every lesson without collisions", async () => {

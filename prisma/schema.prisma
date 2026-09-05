@@ -207,5 +207,6 @@ model Bookmark {
   resource   LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@unique([userId, resourceId])
+  @@index([userId, createdAt(sort: Desc)])
   @@index([resourceId])
 }

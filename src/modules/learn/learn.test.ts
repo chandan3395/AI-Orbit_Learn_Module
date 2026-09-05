@@ -45,6 +45,36 @@ test("pagination uses page and limit on the server", async () => {
   });
 });
 
+test("a page beyond the result set returns an empty page safely", async () => {
+  const result = await listPublicResources({ page: "999", limit: "12" });
+  assert.equal(result.data.length, 0);
+  assert.equal(result.pagination.page, 999);
+  assert.equal(result.pagination.hasNextPage, false);
+  assert.equal(result.pagination.hasPreviousPage, true);
+});
+
+test("empty search and combined filters return consistent metadata", async () => {
+  const empty = await listPublicResources({ search: "no-resource-matches-this-phrase" });
+  assert.equal(empty.data.length, 0);
+  assert.equal(empty.pagination.total, 0);
+  assert.equal(empty.pagination.totalPages, 0);
+
+  const filtered = await listPublicResources({
+    type: "COURSE",
+    difficulty: "INTERMEDIATE",
+    category: "ai-for-developers",
+    featured: "true",
+    limit: "50",
+  });
+  assert.ok(filtered.data.length > 0);
+  assert.ok(filtered.data.every((item) =>
+    item.type === "COURSE" &&
+    item.difficulty === "INTERMEDIATE" &&
+    item.isFeatured &&
+    item.categories.some((category) => category.slug === "ai-for-developers"),
+  ));
+});
+
 test("search finds matching published resources", async () => {
   const result = await listPublicResources({ search: "agent", limit: "50" });
   assert.ok(result.pagination.total >= 2);

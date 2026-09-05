@@ -117,6 +117,15 @@ describe("authenticated user-learning services", { concurrency: 1 }, () => {
     );
   });
 
+  test("empty learning and bookmark collections are returned cleanly", async () => {
+    const learning = await getMyLearning(adminId);
+    const bookmarks = await getMyBookmarks(adminId);
+    assert.equal(learning.data.length, 0);
+    assert.equal(learning.pagination.total, 0);
+    assert.equal(bookmarks.data.length, 0);
+    assert.equal(bookmarks.pagination.total, 0);
+  });
+
   test("course enrollment succeeds and duplicate enrollment is rejected", async () => {
     const enrollment = await enrollInResource(adminId, activeSlug);
     assert.equal(enrollment.status, EnrollmentStatus.ACTIVE);
@@ -175,6 +184,23 @@ describe("authenticated user-learning services", { concurrency: 1 }, () => {
     assert.equal(completed.enrollment.progressPercentage, 20);
     assert.equal(completed.enrollment.status, EnrollmentStatus.ACTIVE);
     assert.ok(completed.progress.completedAt);
+
+    const repeated = await updateLessonProgressForUser(adminId, lesson.id, {
+      status: LessonProgressStatus.COMPLETED,
+    });
+    assert.equal(repeated.enrollment.progressPercentage, 20);
+    assert.equal(repeated.progress.completedAt?.getTime(), completed.progress.completedAt?.getTime());
+  });
+
+  test("invalid lesson positions are rejected", async () => {
+    const lesson = resource(activeSlug).lessons[1];
+    await assert.rejects(
+      () => updateLessonProgressForUser(adminId, lesson.id, {
+        status: LessonProgressStatus.IN_PROGRESS,
+        positionSeconds: 100_000,
+      }),
+      (error) => error instanceof LearnApiError && error.code === "INVALID_PROGRESS",
+    );
   });
 
   test("completing every lesson completes the course", async () => {
@@ -248,6 +274,12 @@ describe("authenticated user-learning services", { concurrency: 1 }, () => {
         },
       }),
       0,
+    );
+    await assert.rejects(
+      () => updateLessonProgressForUser(adminId, resource(activeSlug).lessons[0].id, {
+        status: LessonProgressStatus.COMPLETED,
+      }),
+      (error) => error instanceof LearnApiError && error.code === "NOT_ENROLLED",
     );
   });
 });

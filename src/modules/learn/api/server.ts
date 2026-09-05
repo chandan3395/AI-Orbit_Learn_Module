@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { cache } from "react";
 
 import type { ApiData, Paginated, ResourceCardData, ResourceDetail, Taxonomy } from "../types/frontend";
 
@@ -20,5 +21,5 @@ export class ServerApiError extends Error { constructor(public status: number) {
 
 export const getResources = (query: string) => serverFetch<Paginated<ResourceCardData>>(`/api/learn/resources${query ? `?${query}` : ""}`);
 export const getCategories = () => serverFetch<ApiData<Array<Taxonomy & { resourceCount: number }>>>("/api/learn/categories");
-export const getResource = (slug: string) => serverFetch<ApiData<ResourceDetail>>(`/api/learn/resources/${encodeURIComponent(slug)}`);
+export const getResource = cache((slug: string) => serverFetch<ApiData<ResourceDetail>>(`/api/learn/resources/${encodeURIComponent(slug)}`));
 export const getRelated = (slug: string) => serverFetch<ApiData<ResourceCardData[]>>(`/api/learn/resources/${encodeURIComponent(slug)}/related`);

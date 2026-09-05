@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getResource, ServerApiError } from "@/modules/learn/api/server";
@@ -5,7 +6,22 @@ import { LessonExperience } from "@/modules/learn/components/lesson-experience";
 
 export const dynamic = "force-dynamic";
 
-export default async function LessonPage({ params }: { params: Promise<{ slug: string; lessonId: string }> }) {
+type LessonParams = { params: Promise<{ slug: string; lessonId: string }> };
+
+export async function generateMetadata({ params }: LessonParams): Promise<Metadata> {
+  try {
+    const { slug, lessonId } = await params;
+    const { data } = await getResource(slug);
+    const lesson = data.lessons.find((item) => item.id === lessonId);
+    return lesson
+      ? { title: `${lesson.title} · ${data.title}`, description: lesson.description ?? data.shortDescription }
+      : { title: "Lesson · AI Orbit Learn" };
+  } catch {
+    return { title: "Lesson · AI Orbit Learn" };
+  }
+}
+
+export default async function LessonPage({ params }: LessonParams) {
   const { slug, lessonId } = await params;
   try {
     const { data: resource } = await getResource(slug);

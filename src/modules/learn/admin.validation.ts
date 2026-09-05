@@ -64,7 +64,7 @@ export function validateLessonType(data: z.infer<typeof lessonFields>, context: 
 
 export const lessonCreateSchema = lessonFields.strict().superRefine(validateLessonType);
 export const lessonUpdateSchema = lessonFields.partial().strict().refine((data) => Object.keys(data).length > 0, "At least one field is required");
-export const lessonReorderSchema = z.object({ lessonIds: z.array(uuidSchema).min(1).refine((ids) => new Set(ids).size === ids.length, "Lesson IDs must be unique") }).strict();
+export const lessonReorderSchema = z.object({ lessonIds: z.array(uuidSchema).min(1).max(100).refine((ids) => new Set(ids).size === ids.length, "Lesson IDs must be unique") }).strict();
 
 const namedEntity = z.object({ name: z.string().trim().min(2).max(120), slug });
 export const categoryCreateSchema = namedEntity.extend({ description: z.string().trim().max(2_000).nullable().optional() }).strict();

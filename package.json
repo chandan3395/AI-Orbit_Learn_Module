@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "seed": "prisma db seed",
     "test": "tsx --test --test-concurrency=1 src/modules/learn/learn.test.ts src/modules/learn/user-learning.test.ts src/modules/learn/admin.test.ts",
     "typecheck": "tsc --noEmit",
     "prisma:validate": "prisma validate",

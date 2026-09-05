@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getRelated, getResource, ServerApiError } from "@/modules/learn/api/server";
@@ -6,6 +7,16 @@ import { ResourceActions } from "@/modules/learn/components/resource-actions";
 import { ResourceGrid } from "@/modules/learn/components/resource-grid";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  try {
+    const { slug } = await params;
+    const { data } = await getResource(slug);
+    return { title: `${data.title} · AI Orbit Learn`, description: data.shortDescription };
+  } catch {
+    return { title: "Resource · AI Orbit Learn" };
+  }
+}
 
 export default async function ResourcePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
