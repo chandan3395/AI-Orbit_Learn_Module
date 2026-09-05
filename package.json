@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "tsx --test src/modules/learn/learn.test.ts",
     "typecheck": "tsc --noEmit",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate"
