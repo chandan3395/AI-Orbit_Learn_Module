@@ -1,0 +1,2 @@
+import { MyLearningDashboard } from "@/modules/learn/components/my-learning-dashboard";
+export default function MyLearningPage() { return <div className="shell page-stack"><section className="page-heading compact-heading"><p className="kicker">Your library</p><h1>My Learning</h1><p>Pick up where you left off, review completed courses, and revisit saved resources.</p></section><MyLearningDashboard /></div>; }

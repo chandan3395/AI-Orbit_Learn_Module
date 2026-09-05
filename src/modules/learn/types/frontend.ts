@@ -1,0 +1,13 @@
+export type Author = { id: string; name: string; slug: string; bio?: string | null; avatarUrl: string | null };
+export type Taxonomy = { id: string; name: string; slug: string };
+export type Lesson = { id: string; title: string; slug: string; description: string | null; type: "TEXT" | "VIDEO" | "LINK"; content: string | null; videoUrl: string | null; externalUrl: string | null; durationMinutes: number | null; order: number; isPreview: boolean };
+export type LessonProgress = { lessonId: string; status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"; positionSeconds: number | null };
+export type ResourceCardData = { id: string; title: string; slug: string; shortDescription: string; thumbnailUrl: string | null; type: "COURSE" | "GUIDE" | "EBOOK"; difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"; durationMinutes: number | null; isFeatured: boolean; publishedAt: string | null; author: Author; categories: Taxonomy[]; tags: Taxonomy[]; lessonCount: number };
+export type UserState = { bookmarked: boolean; enrolled: boolean; progressPercentage: number; enrollmentStatus: "ACTIVE" | "COMPLETED" | null; lessonProgress: LessonProgress[] };
+export type ResourceDetail = ResourceCardData & { description: string; sourceUrl: string | null; lessons: Lesson[]; userState?: UserState };
+export type Pagination = { page: number; limit: number; total: number; totalPages: number; hasNextPage: boolean; hasPreviousPage: boolean };
+export type Paginated<T> = { success: true; data: T[]; pagination: Pagination };
+export type ApiData<T> = { success: true; data: T };
+export type LearningItem = { resource: Pick<ResourceCardData, "id" | "title" | "slug" | "thumbnailUrl" | "difficulty" | "lessonCount">; progressPercentage: number; status: "ACTIVE" | "COMPLETED"; startedAt: string; lastAccessedAt: string; completedAt: string | null };
+export type ContinueItem = { resource: LearningItem["resource"]; progressPercentage: number; lastAccessedAt: string; nextIncompleteLesson: Pick<Lesson, "id" | "title" | "slug" | "type" | "durationMinutes" | "order"> | null };
+export type BookmarkItem = { id: string; createdAt: string; resource: ResourceCardData };

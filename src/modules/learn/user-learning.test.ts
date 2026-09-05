@@ -229,12 +229,11 @@ describe("authenticated user-learning services", { concurrency: 1 }, () => {
     if (!("userState" in authenticatedDetail)) {
       assert.fail("Authenticated detail must include userState");
     }
-    assert.deepEqual(authenticatedDetail.userState, {
-      bookmarked: true,
-      enrolled: true,
-      progressPercentage: 20,
-      enrollmentStatus: EnrollmentStatus.ACTIVE,
-    });
+    assert.equal(authenticatedDetail.userState.bookmarked, true);
+    assert.equal(authenticatedDetail.userState.enrolled, true);
+    assert.equal(authenticatedDetail.userState.progressPercentage, 20);
+    assert.equal(authenticatedDetail.userState.enrollmentStatus, EnrollmentStatus.ACTIVE);
+    assert.equal(authenticatedDetail.userState.lessonProgress.length, 1);
   });
 
   test("enrollment removal deletes only that user's course progress", async () => {

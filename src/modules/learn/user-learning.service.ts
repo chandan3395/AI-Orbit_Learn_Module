@@ -352,5 +352,6 @@ export async function getUserState(userId: string, resourceId: string) {
     enrolled: Boolean(enrollment),
     progressPercentage: enrollment?.progressPercentage ?? 0,
     enrollmentStatus: enrollment?.status ?? null,
+    lessonProgress: state?.lessons.flatMap(({ progress }) => progress) ?? [],
   };
 }

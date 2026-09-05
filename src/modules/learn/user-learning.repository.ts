@@ -320,6 +320,15 @@ export function findResourceUserState(userId: string, resourceId: string) {
         select: { progressPercentage: true, status: true },
         take: 1,
       },
+      lessons: {
+        select: {
+          progress: {
+            where: { userId },
+            select: { lessonId: true, status: true, positionSeconds: true },
+            take: 1,
+          },
+        },
+      },
     },
   });
 }
