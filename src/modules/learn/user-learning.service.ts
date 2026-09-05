@@ -32,6 +32,7 @@ import type {
   ProgressUpdateInput,
   RawMyLearningQuery,
 } from "./user-learning.types";
+import { progressUpdateSchema } from "./request.validation";
 
 const CONTINUE_LEARNING_LIMIT = 6;
 const MAX_TRANSACTION_ATTEMPTS = 3;
@@ -179,37 +180,7 @@ export async function removeBookmark(userId: string, slug: string) {
 }
 
 export function parseProgressUpdate(value: unknown): ProgressUpdateInput {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new LearnApiError(400, "INVALID_PROGRESS", "Invalid progress body");
-  }
-  const body = value as Record<string, unknown>;
-  if (
-    body.status !== LessonProgressStatus.IN_PROGRESS &&
-    body.status !== LessonProgressStatus.COMPLETED
-  ) {
-    throw new LearnApiError(
-      400,
-      "INVALID_PROGRESS",
-      "status must be IN_PROGRESS or COMPLETED",
-    );
-  }
-  if (
-    body.positionSeconds !== undefined &&
-    (!Number.isInteger(body.positionSeconds) ||
-      (body.positionSeconds as number) < 0)
-  ) {
-    throw new LearnApiError(
-      400,
-      "INVALID_PROGRESS",
-      "positionSeconds must be a non-negative integer",
-    );
-  }
-  return {
-    status: body.status,
-    ...(body.positionSeconds !== undefined
-      ? { positionSeconds: body.positionSeconds as number }
-      : {}),
-  };
+  return progressUpdateSchema.parse(value);
 }
 
 export async function updateLessonProgressForUser(

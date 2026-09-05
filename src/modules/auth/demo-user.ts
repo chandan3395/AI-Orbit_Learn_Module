@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db/prisma";
 import { LearnApiError } from "@/modules/learn/learn.errors";
+import { z } from "zod";
 
-const uuidPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const demoUserIdSchema = z.uuid();
 
 type ResolveDemoUserOptions = { optional?: boolean };
 
@@ -27,7 +27,7 @@ export async function resolveDemoUser(
 ): Promise<DemoUser | null> {
   const userId = request.headers.get("x-demo-user-id")?.trim();
   if (!userId && options.optional) return null;
-  if (!userId || !uuidPattern.test(userId)) {
+  if (!userId || !demoUserIdSchema.safeParse(userId).success) {
     throw new LearnApiError(
       401,
       "UNAUTHORIZED",
@@ -45,6 +45,14 @@ export async function resolveDemoUser(
       "UNAUTHORIZED",
       "A valid x-demo-user-id header is required",
     );
+  }
+  return user;
+}
+
+export async function requireAdmin(request: Request) {
+  const user = await resolveDemoUser(request);
+  if (user.role !== "ADMIN") {
+    throw new LearnApiError(403, "FORBIDDEN", "Administrator access is required");
   }
   return user;
 }
