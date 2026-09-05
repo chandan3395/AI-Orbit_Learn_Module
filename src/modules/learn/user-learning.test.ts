@@ -20,6 +20,7 @@ import {
 } from "./user-learning.service";
 
 const adminId = "10000000-0000-4000-8000-000000000003";
+const danielId = "10000000-0000-4000-8000-000000000002";
 const activeSlug = "multi-agent-systems-in-practice";
 const completedSlug = "ai-assisted-typescript-development";
 const secondActiveSlug = "building-reliable-llm-applications";
@@ -260,6 +261,43 @@ describe("authenticated user-learning services", { concurrency: 1 }, () => {
     assert.equal(authenticatedDetail.userState.progressPercentage, 20);
     assert.equal(authenticatedDetail.userState.enrollmentStatus, EnrollmentStatus.ACTIVE);
     assert.equal(authenticatedDetail.userState.lessonProgress.length, 1);
+  });
+
+  test("preview lessons are accessible without enrollment", async () => {
+    const detail = await getPublicResource(activeSlug);
+    const preview = detail.lessons[0];
+    assert.equal(preview.isPreview, true);
+    assert.equal(preview.isLocked, false);
+    assert.ok(preview.content);
+  });
+
+  test("non-preview lesson content is blocked without enrollment", async () => {
+    const detail = await getPublicResource(activeSlug);
+    const protectedLesson = detail.lessons[2];
+    assert.equal(protectedLesson.isPreview, false);
+    assert.equal(protectedLesson.isLocked, true);
+    assert.equal(protectedLesson.description, null);
+    assert.equal(protectedLesson.content, null);
+    assert.equal(protectedLesson.videoUrl, null);
+    assert.equal(protectedLesson.externalUrl, null);
+  });
+
+  test("an enrolled user can access non-preview lesson content", async () => {
+    const detail = await getPublicResource(activeSlug, adminId);
+    const protectedLesson = detail.lessons[2];
+    assert.equal(protectedLesson.isLocked, false);
+    assert.ok(protectedLesson.content);
+  });
+
+  test("another user's enrollment does not grant lesson access", async () => {
+    const detail = await getPublicResource(activeSlug, danielId);
+    if (!("userState" in detail)) {
+      assert.fail("Authenticated detail must include userState");
+    }
+    const protectedLesson = detail.lessons[2];
+    assert.equal(detail.userState.enrolled, false);
+    assert.equal(protectedLesson.isLocked, true);
+    assert.equal(protectedLesson.content, null);
   });
 
   test("enrollment removal deletes only that user's course progress", async () => {

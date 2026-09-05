@@ -131,7 +131,10 @@ function toResourceCard(record: ResourceCardRecord) {
   };
 }
 
-function toResourceDetail(record: ResourceDetailRecord) {
+function toResourceDetail(
+  record: ResourceDetailRecord,
+  canAccessProtectedLessons: boolean,
+) {
   return {
     id: record.id,
     title: record.title,
@@ -148,7 +151,17 @@ function toResourceDetail(record: ResourceDetailRecord) {
     author: record.author,
     categories: record.categories.map(({ category }) => category),
     tags: record.tags.map(({ tag }) => tag),
-    lessons: record.lessons,
+    lessons: record.lessons.map((lesson) => {
+      const isLocked = !lesson.isPreview && !canAccessProtectedLessons;
+      return {
+        ...lesson,
+        description: isLocked ? null : lesson.description,
+        content: isLocked ? null : lesson.content,
+        videoUrl: isLocked ? null : lesson.videoUrl,
+        externalUrl: isLocked ? null : lesson.externalUrl,
+        isLocked,
+      };
+    }),
     lessonCount: record._count.lessons,
   };
 }
@@ -178,10 +191,13 @@ export async function getPublicResource(slug: string, userId?: string) {
       "Learning resource not found",
     );
   }
-  const detail = toResourceDetail(record);
-  if (!userId) return detail;
+  if (!userId) return toResourceDetail(record, false);
 
-  return { ...detail, userState: await getUserState(userId, record.id) };
+  const userState = await getUserState(userId, record.id);
+  return {
+    ...toResourceDetail(record, userState.enrolled),
+    userState,
+  };
 }
 
 export async function listPublicCategories() {

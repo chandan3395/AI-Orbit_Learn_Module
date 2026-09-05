@@ -48,13 +48,13 @@ Returns only `PUBLISHED` resources. Each card includes author, categories, tags,
     "title": "Build Your First AI Agent",
     "slug": "build-your-first-ai-agent",
     "shortDescription": "Create a tool-using agent...",
-    "thumbnailUrl": "https://example.com/...",
+    "thumbnailUrl": null,
     "type": "COURSE",
     "difficulty": "INTERMEDIATE",
     "durationMinutes": 110,
     "isFeatured": true,
     "publishedAt": "2026-06-12T12:00:00.000Z",
-    "author": { "id": "uuid", "name": "Marcus Chen", "slug": "marcus-chen", "avatarUrl": "https://example.com/..." },
+    "author": { "id": "uuid", "name": "Marcus Chen", "slug": "marcus-chen", "avatarUrl": null },
     "categories": [{ "id": "uuid", "name": "AI Agents", "slug": "ai-agents" }],
     "tags": [{ "id": "uuid", "name": "Agents", "slug": "agents" }],
     "lessonCount": 5
@@ -67,7 +67,7 @@ Returns only `PUBLISHED` resources. Each card includes author, categories, tags,
 
 `GET /api/learn/resources/{slug}` — public; optional demo authentication
 
-Returns a published resource with author, categories, tags, and lessons ordered by `order`. When a valid `x-demo-user-id` is supplied, `data.userState` also includes bookmark, enrollment, percentage, enrollment status, and per-lesson progress. Unknown, draft, or archived resources return `404 RESOURCE_NOT_FOUND`.
+Returns a published resource with author, categories, tags, and lessons ordered by `order`. Preview lesson content is public. Non-preview lesson payload fields are redacted and `isLocked` is `true` unless the supplied `x-demo-user-id` belongs to a user enrolled in the course. When a valid demo user is supplied, `data.userState` also includes bookmark, enrollment, percentage, enrollment status, and per-lesson progress. Unknown, draft, or archived resources return `404 RESOURCE_NOT_FOUND`.
 
 ### Categories
 
@@ -154,7 +154,7 @@ Create body (update accepts a nonempty subset):
   "slug": "reliable-agent-systems",
   "shortDescription": "A practical course description.",
   "description": "A complete description long enough for a detail page.",
-  "thumbnailUrl": "https://example.com/image.jpg",
+  "thumbnailUrl": null,
   "type": "COURSE",
   "difficulty": "INTERMEDIATE",
   "status": "PUBLISHED",
@@ -217,8 +217,7 @@ The unique list must contain every lesson in the course exactly once (maximum 10
 
 ### Author management
 
-- `POST /api/learn/admin/authors` with `{ "name": "Ada Example", "slug": "ada-example", "bio": "...", "avatarUrl": "https://example.com/avatar.png" }`; returns `201`.
+- `POST /api/learn/admin/authors` with `{ "name": "Ada Example", "slug": "ada-example", "bio": "...", "avatarUrl": null }`; returns `201`.
 - `PATCH /api/learn/admin/authors` with `id` plus a nonempty subset of those fields.
 
 Taxonomy/author slugs are unique. Update IDs must be UUIDs. These endpoints intentionally omit deletion so referenced content cannot be orphaned. Common errors are `400 VALIDATION_ERROR`, `404 RECORD_NOT_FOUND`, and `409 UNIQUE_CONSTRAINT`.
-

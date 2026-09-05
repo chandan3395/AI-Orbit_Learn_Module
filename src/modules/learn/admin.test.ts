@@ -111,7 +111,7 @@ describe("admin content management", { concurrency: 1 }, () => {
   test("lesson validation and unique order constraints are enforced", async () => {
     assert.throws(() => lessonCreateSchema.parse({ title: "Invalid Video", slug: "invalid-video", type: "VIDEO", order: 1 }));
     await adminCreateLesson(resource.id, lessonCreateSchema.parse({ title: "Foundation and Context", slug: "foundation-and-context", type: "TEXT", content: "Detailed test lesson content.", durationMinutes: 10, order: 1 }));
-    await adminCreateLesson(resource.id, lessonCreateSchema.parse({ title: "Applied Demonstration", slug: "applied-demonstration", type: "VIDEO", videoUrl: "https://example.com/video/demo", durationMinutes: 12, order: 2 }));
+    await adminCreateLesson(resource.id, lessonCreateSchema.parse({ title: "Applied Demonstration", slug: "applied-demonstration", type: "VIDEO", videoUrl: "https://www.youtube.com/watch?v=aircAruvnKk", durationMinutes: 12, order: 2 }));
     await assert.rejects(
       () => adminCreateLesson(resource.id, lessonCreateSchema.parse({ title: "Duplicate Order", slug: "duplicate-order", type: "TEXT", content: "Duplicate order test content.", order: 2 })),
       (error) => mapApiError(error).code === "UNIQUE_CONSTRAINT",

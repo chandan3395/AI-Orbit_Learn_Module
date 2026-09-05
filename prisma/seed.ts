@@ -26,21 +26,21 @@ const users = [
     name: "Maya Patel",
     email: "maya.patel@learn-demo.example",
     role: UserRole.USER,
-    avatarUrl: "https://example.com/ai-orbit/avatars/maya-patel.png",
+    avatarUrl: null,
   },
   {
     id: uuid(1, 2),
     name: "Daniel Kim",
     email: "daniel.kim@learn-demo.example",
     role: UserRole.USER,
-    avatarUrl: "https://example.com/ai-orbit/avatars/daniel-kim.png",
+    avatarUrl: null,
   },
   {
     id: uuid(1, 3),
     name: "Aisha Rahman",
     email: "admin@learn-demo.example",
     role: UserRole.ADMIN,
-    avatarUrl: "https://example.com/ai-orbit/avatars/aisha-rahman.png",
+    avatarUrl: null,
   },
 ] as const;
 
@@ -211,8 +211,8 @@ const lessons = courses.flatMap((course, courseIndex) => {
       description: `${title} applied to ${course.title.toLowerCase()}.`,
       type,
       content: type === LessonType.TEXT ? `This lesson explains ${title.toLowerCase()} through a practical example, a review checklist, and a short exercise.` : null,
-      videoUrl: type === LessonType.VIDEO ? `https://example.com/ai-orbit/videos/${course.slug}/${lessonIndex + 1}` : null,
-      externalUrl: type === LessonType.LINK ? `https://example.com/ai-orbit/labs/${course.slug}/${lessonIndex + 1}` : null,
+      videoUrl: null,
+      externalUrl: null,
       durationMinutes,
       order: lessonIndex + 1,
       isPreview: lessonIndex === 0,
@@ -263,8 +263,8 @@ async function main() {
       for (const author of authors) {
         await tx.author.upsert({
           where: { id: author.id },
-          update: { name: author.name, slug: author.slug, bio: author.bio, avatarUrl: `https://example.com/ai-orbit/authors/${author.slug}.png` },
-          create: { ...author, avatarUrl: `https://example.com/ai-orbit/authors/${author.slug}.png` },
+          update: { name: author.name, slug: author.slug, bio: author.bio, avatarUrl: null },
+          create: { ...author, avatarUrl: null },
         });
       }
 
@@ -282,12 +282,12 @@ async function main() {
           slug: item.slug,
           shortDescription: item.shortDescription,
           description: `${item.shortDescription} Work through practical patterns, common failure modes, and a reusable workflow you can apply to real projects.`,
-          thumbnailUrl: `https://example.com/ai-orbit/resources/${item.slug}.jpg`,
+          thumbnailUrl: null,
           type: item.type,
           difficulty: item.difficulty,
           status: item.status,
           durationMinutes: item.durationMinutes,
-          sourceUrl: `https://example.com/ai-orbit/library/${item.slug}`,
+          sourceUrl: null,
           isFeatured: item.isFeatured,
           authorId: authorIdBySlug.get(item.authorSlug)!,
           publishedAt: item.publishedAt,

@@ -1,6 +1,6 @@
 export type Author = { id: string; name: string; slug: string; bio?: string | null; avatarUrl: string | null };
 export type Taxonomy = { id: string; name: string; slug: string };
-export type Lesson = { id: string; title: string; slug: string; description: string | null; type: "TEXT" | "VIDEO" | "LINK"; content: string | null; videoUrl: string | null; externalUrl: string | null; durationMinutes: number | null; order: number; isPreview: boolean };
+export type Lesson = { id: string; title: string; slug: string; description: string | null; type: "TEXT" | "VIDEO" | "LINK"; content: string | null; videoUrl: string | null; externalUrl: string | null; durationMinutes: number | null; order: number; isPreview: boolean; isLocked: boolean };
 export type LessonProgress = { lessonId: string; status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"; positionSeconds: number | null };
 export type ResourceCardData = { id: string; title: string; slug: string; shortDescription: string; thumbnailUrl: string | null; type: "COURSE" | "GUIDE" | "EBOOK"; difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"; durationMinutes: number | null; isFeatured: boolean; publishedAt: string | null; author: Author; categories: Taxonomy[]; tags: Taxonomy[]; lessonCount: number };
 export type UserState = { bookmarked: boolean; enrolled: boolean; progressPercentage: number; enrollmentStatus: "ACTIVE" | "COMPLETED" | null; lessonProgress: LessonProgress[] };
